@@ -1,0 +1,29 @@
+[package]
+name = "vsky"
+version = "0.1.0"
+edition = "2021"
+description = "Mask the sky out of an image set and cull sky points from a dvlt reconstruction"
+
+[dependencies]
+# Scaled JPEG decode (DCT 1/2, 1/4, 1/8): a 6048x4032 frame lands at 756x504
+# for ~1/64th of the work. Same trick and version as vfold.
+jpeg-decoder = "0.3.2"
+# PNG masks out, non-JPEG input, EXIF orientation, resampling.
+image = { version = "0.25.10", default-features = false, features = ["jpeg", "png"] }
+rayon = "1.12.0"
+# SIMD JPEG encode for --key output.
+jpeg-encoder = { version = "0.7.1", features = ["simd"] }
+
+# ONNX Runtime, same release as vfold so the two can share provider DLLs.
+# DirectML exists only on Windows; CUDA builds have no macOS binaries.
+[target.'cfg(windows)'.dependencies]
+ort = { version = "=2.0.0-rc.12", features = ["cuda", "directml"] }
+[target.'cfg(target_os = "linux")'.dependencies]
+ort = { version = "=2.0.0-rc.12", features = ["cuda"] }
+[target.'cfg(not(any(windows, target_os = "linux")))'.dependencies]
+ort = { version = "=2.0.0-rc.12" }
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
