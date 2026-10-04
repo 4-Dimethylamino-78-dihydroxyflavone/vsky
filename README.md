@@ -85,18 +85,24 @@ evidence, so at worst it equals the plain vote. The rule itself is `is_sky()` in
 
 | | default | alternative |
 |---|---|---|
-| file | `skyseg.onnx` (176 MB) | `segformer-b0-ade.onnx` (15 MB) |
-| source | huggingface.co/JianyuanWang/skyseg | Xenova/segformer-b0-finetuned-ade-512-512 |
-| licence | MIT | NVIDIA non-commercial |
-| kind | U2-Net, binary sky, 320² | 150-class ADE20K, sky = class 2 |
-| building set, CPU | 0.65 s/frame | 0.5 s/frame |
+| file | `segformer-b0-ade.onnx` (15 MB) | `skyseg.onnx` (176 MB) |
+| source | Xenova/segformer-b0-finetuned-ade-512-512 | huggingface.co/JianyuanWang/skyseg |
+| licence | NVIDIA non-commercial | MIT |
+| kind | 150-class ADE20K, sky = class 2 | U2-Net, binary sky, 320² |
+| building set, CPU | 0.5 s/frame | 0.65 s/frame |
 
 Both live in `%USERPROFILE%\.cache\vsky\`. The output layout is detected (1
 channel = probability, 150 = ADE20K logits) and anything else is refused,
-because a Cityscapes model's channel 2 is "building". skyseg is the default: it
-is the model VGGT's demo filters sky with, and on tree canopy it masks the sky
-between bare branches that SegFormer labels as tree. Neither resolves the
-smallest canopy gaps, which is the blue speckle left inside the tree crowns.
+because a Cityscapes model's channel 2 is "building".
+
+SegFormer is the default because keyed removal is exact per source pixel, so a
+false sky pixel deletes real structure with no vote to rescue it. Precision
+beats recall. On the indoor set (57 frames), skyseg called a beige ceiling 25%
+sky and swallowed trees, pillars and paving in an over-bright porch view (57%).
+It found sky in 23 frames. SegFormer, which has an explicit `ceiling` class,
+found sky only in the 12 doorway/window views and masked just the sky. skyseg
+(`--model ...\skyseg.onnx`) is more aggressive in tree canopy gaps
+outdoors, at the price of smearing sky over twig tips.
 
 Device: `--device auto` tries CUDA then CPU, each rung hard-failed so the
 printed device is the real one. DirectML is opt-in (`--device dml`) until

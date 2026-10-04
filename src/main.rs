@@ -39,8 +39,9 @@ OPTIONS:
                          sky. The original is kept as scene_withsky.ply and is
                          what every later --cull reads. Rerun dvlt_postprocess after.
         --size <PX>      the -s that reconstruction ran at          [default: 504]
-        --model <PATH>   skyseg (1-channel) or ADE20K (150-class) ONNX
-                         [default: ~/.cache/vsky/skyseg.onnx]
+        --model <PATH>   ADE20K (150-class, e.g. SegFormer) or skyseg (1-channel) ONNX.
+                         ADE20K knows 'ceiling': no false sky indoors
+                         [default: ~/.cache/vsky/segformer-b0-ade.onnx]
         --device <D>     auto | cuda | dml | cpu                [default: auto]
         --thresh <F>     sky probability cut                      [default: 0.5]
         --grow <PX>      widen the sky by PX source pixels          [default: 0]
@@ -212,7 +213,7 @@ fn parse_args() -> Result<Args, String> {
         masks: None,
         cull: None,
         size: 504,
-        model: home.unwrap_or_default().join(".cache").join("vsky").join("skyseg.onnx"),
+        model: home.unwrap_or_default().join(".cache").join("vsky").join("segformer-b0-ade.onnx"),
         device: "auto".into(),
         thresh: 0.5,
         grow: 0,
