@@ -332,8 +332,7 @@ fn sibling(input: &Path, suffix: &str) -> PathBuf {
 
 /// `<dir>/images.txt`: one `<stem>.jpg` per line, in `images` order.
 fn write_order(dir: &Path, images: &[PathBuf]) -> Result<(), String> {
-    let list: String = images.iter().map(|p| format!("{}.jpg
-", p.file_stem().unwrap_or_default().to_string_lossy())).collect();
+    let list: String = images.iter().map(|p| format!("{}.jpg\n", p.file_stem().unwrap_or_default().to_string_lossy())).collect();
     std::fs::write(dir.join("images.txt"), list).map_err(|e| format!("{}: {e}", dir.display()))
 }
 
