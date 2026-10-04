@@ -29,14 +29,16 @@ camera's pose became more consistent, not less. Full sets through
 
 | set | sky-blue points | ground, aligned frame¹ | photo-consistency |
 |---|---|---|---|
-| outdoors, 109 frames | 21.6% → 3.3% | −0.2% | 0.207 → 0.232 |
-| indoors, 57 frames | 1.1% → 0.7% (0.8% stripped: doorway sky) | −0.4% | 0.276 → 0.339 |
+| outdoors, 109 frames | 21.6% → 3.0% | −0.3% | 0.207 → 0.233 |
+| indoors, 57 frames | 1.1% → 0.6% (0.8% stripped: doorway sky) | −1.6%² | 0.276 → 0.360 |
 
 ¹ Points below the lowest camera, counted after a similarity fit of the
 `-d` cameras onto the plain run's. Counted in each run's own frame, the
 same proxy read +13% / −6%: two dvlt solutions place their cameras
 differently, so per-run counts do not compare. An earlier "+14% ground"
-claim came from exactly that mistake.
+claim came from exactly that mistake. ² Indoors the two solutions' cameras
+differ by 17% of the rig radius (22 portrait frames), so that alignment is
+looser; geometry-only renders show the same structure in both.
 
 The vote cull stays for reconstructions already made from raw images.
 `reconstruct.bat --sky` runs key → dvlt → strip.
