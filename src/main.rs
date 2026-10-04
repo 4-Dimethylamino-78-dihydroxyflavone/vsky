@@ -41,7 +41,9 @@ OPTIONS:
         --size <PX>      the -s that reconstruction ran at          [default: 504]
         --model <PATH>   ADE20K (150-class, e.g. SegFormer) or skyseg (1-channel) ONNX.
                          ADE20K knows 'ceiling': no false sky indoors
-                         [default: ~/.cache/vsky/segformer-b0-ade.onnx]
+                         A bare file name is looked up like the default.
+                         [default: segformer-b0-ade.onnx in <exe dir>/model/,
+                          else ~/.cache/vsky/]
         --device <D>     auto | cuda | dml | cpu                [default: auto]
         --thresh <F>     sky probability cut                      [default: 0.5]
         --grow <PX>      widen the sky by PX source pixels          [default: 0]
@@ -207,13 +209,12 @@ fn run() -> Result<(), String> {
 }
 
 fn parse_args() -> Result<Args, String> {
-    let home = std::env::var_os("USERPROFILE").or_else(|| std::env::var_os("HOME")).map(PathBuf::from);
     let mut a = Args {
         input: PathBuf::new(),
         masks: None,
         cull: None,
         size: 504,
-        model: home.unwrap_or_default().join(".cache").join("vsky").join("segformer-b0-ade.onnx"),
+        model: model_path("segformer-b0-ade.onnx"),
         device: "auto".into(),
         thresh: 0.5,
         grow: 0,
@@ -245,12 +246,31 @@ fn parse_args() -> Result<Args, String> {
             _ => return Err(format!("unexpected argument {arg}")),
         }
     }
+    if a.model.parent().is_some_and(|p| p.as_os_str().is_empty()) {
+        a.model = model_path(&a.model.to_string_lossy());
+    }
     match input {
         Some(i) => a.input = i,
         None if a.strip.is_some() => {}
         None => return Err(USAGE.to_string()),
     }
     Ok(a)
+}
+
+/// `<exe dir>\model\<name>` when present (a self-contained install), else the
+/// user cache `~/.cache/vsky/<name>`.
+fn model_path(name: &str) -> PathBuf {
+    let local = std::env::current_exe().ok().and_then(|e| e.parent().map(|d| d.join("model").join(name)));
+    match local {
+        Some(p) if p.is_file() => p,
+        _ => std::env::var_os("USERPROFILE")
+            .or_else(|| std::env::var_os("HOME"))
+            .map(PathBuf::from)
+            .unwrap_or_default()
+            .join(".cache")
+            .join("vsky")
+            .join(name),
+    }
 }
 
 fn num<T: std::str::FromStr>(name: &str, v: String) -> Result<T, String> {
