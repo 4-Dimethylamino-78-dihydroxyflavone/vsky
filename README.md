@@ -23,8 +23,21 @@ vsky <IMAGE_DIR | list.txt> --cull <dvlt_out> --size 504 # vote cull (fallback)
 sky point comes back exactly (0,0,0): the per-pixel provenance the PLY
 otherwise lacks, carried through its colour channel. Measured A/B on the
 60-frame building set, keyed vs raw + vote cull: 3.1% vs 5.0% sky-blue points
-left, 14% more ground points kept, multi-view photo-consistency 0.210 vs
-0.206, and the most isolated camera's pose became more consistent, not less.
+left, multi-view photo-consistency 0.210 vs 0.206, and the most isolated
+camera's pose became more consistent, not less. Full sets through
+`reconstruct.bat -d`, against plain dvlt on the raw frames:
+
+| set | sky-blue points | ground, aligned frame¹ | photo-consistency |
+|---|---|---|---|
+| outdoors, 109 frames | 21.6% → 3.3% | −0.2% | 0.207 → 0.232 |
+| indoors, 57 frames | 1.1% → 0.7% (0.8% stripped: doorway sky) | −0.4% | 0.276 → 0.339 |
+
+¹ Points below the lowest camera, counted after a similarity fit of the
+`-d` cameras onto the plain run's. Counted in each run's own frame, the
+same proxy read +13% / −6%: two dvlt solutions place their cameras
+differently, so per-run counts do not compare. An earlier "+14% ground"
+claim came from exactly that mistake.
+
 The vote cull stays for reconstructions already made from raw images.
 `reconstruct.bat --sky` runs key → dvlt → strip.
 

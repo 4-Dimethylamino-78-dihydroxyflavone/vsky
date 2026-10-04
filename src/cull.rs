@@ -173,7 +173,8 @@ pub fn run(dir: &Path, masks: &[View], size: u32) -> Result<Stats, String> {
 /// For a reconstruction of `vsky --key` images: every point that is exactly
 /// (0,0,0) came from a keyed sky pixel, so this is the exact per-source-pixel
 /// removal the vote approximates. Measured on the building capture against raw +
-/// vote cull: 3.1% vs 5.0% sky-blue left, 14% more ground points kept.
+/// vote cull: 3.1% vs 5.0% sky-blue left; ground preserved within 0.5% once
+/// both clouds are aligned into one frame.
 pub fn strip(dir: &Path) -> Result<Stats, String> {
     let source = original(dir)?;
     let bytes = fs::read(&source).map_err(|e| format!("{}: {e}", source.display()))?;
